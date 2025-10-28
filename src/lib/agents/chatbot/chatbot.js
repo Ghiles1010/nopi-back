@@ -6,8 +6,8 @@ import { ChatOpenAI } from '@langchain/openai';
 import { HumanMessage } from '@langchain/core/messages';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { ConversationMemory } from './memory.js';
-import { InvestmentExtractor } from './extractor.js';
-import InfoState from './models/infoState.js';
+import { InvestmentExtractor } from '../../agents/extractor/extractor.js';
+import InfoState from './infoState.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -58,7 +58,7 @@ export class Chatbot {
    */
   loadSystemPrompt() {
     try {
-      const promptPath = join(__dirname, '../prompts/system_prompt.txt');
+      const promptPath = join(__dirname, './system_prompt.txt');
       return readFileSync(promptPath, 'utf-8');
     } catch (error) {
       console.error('Error loading system prompt file, using default:', error.message);

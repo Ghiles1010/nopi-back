@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import { Chatbot } from './chatbot.js';
-import { TaxSimulator } from './simulator.js';
+import { Chatbot } from './lib/agents/chatbot/chatbot.js';
+import { TaxSimulator } from './lib/simulator.js';
 import readline from 'readline';
 
 // Initialize the chatbot and simulator

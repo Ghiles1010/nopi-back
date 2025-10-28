@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { InfoStateSchema } from './models/infoState.js';
+import { InfoStateSchema } from '../../agents/chatbot/infoState.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,7 +32,7 @@ export class InvestmentExtractor {
    */
   createPromptTemplate() {
     try {
-      const promptPath = join(__dirname, '../prompts/extraction_prompt.txt');
+      const promptPath = join(__dirname, './extraction_prompt.txt');
       const basePrompt = readFileSync(promptPath, 'utf-8');
       
       // Create prompt template with variable
