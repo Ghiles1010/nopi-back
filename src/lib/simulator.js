@@ -36,6 +36,27 @@ export class TaxSimulator {
       },
     };
   }
+
+  /**
+   * Convert simulation results to formatted string for prompt injection
+   * @param {Object} results - Results from calculate() method
+   * @returns {string} Formatted string representation
+   */
+  toString(results) {
+    return `Les résultats de simulation sont disponibles:
+
+Régime Micro-BIC:
+- Revenus annuels après charges: ${results.micro_bic.revenus.toFixed(2)}€
+- Impôts: ${results.micro_bic.impots.toFixed(2)}€
+- Net après impôts: ${results.micro_bic.net_apres_impots.toFixed(2)}€
+
+Régime Réel:
+- Revenus annuels après charges: ${results.reel.revenus.toFixed(2)}€
+- Impôts: ${results.reel.impots.toFixed(2)}€
+- Net après impôts: ${results.reel.net_apres_impots.toFixed(2)}€
+
+Tu peux maintenant expliquer ces résultats à l'utilisateur et lui donner des conseils sur quel régime est le plus avantageux pour lui.`;
+  }
 }
 
 export default TaxSimulator

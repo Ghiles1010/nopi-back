@@ -8,6 +8,7 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { ConversationMemory } from './memory.js';
 import { InvestmentExtractor } from '../../agents/extractor/extractor.js';
 import InfoState from './infoState.js';
+import { TaxSimulator } from '../../simulator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -30,6 +31,9 @@ export class Chatbot {
     
     // Initialize data extractor agent
     this.extractor = new InvestmentExtractor();
+    
+    // Initialize simulator for calculations
+    this.simulator = new TaxSimulator();
     
     // Track extracted state across conversation (Pydantic-like model)
     this.infoState = new InfoState();
@@ -82,9 +86,23 @@ export class Chatbot {
       // Prepare variables for dynamic prompt using a formatter (pydantic-like toString)
       const state_json = JSON.stringify(this.infoState.toJSON(), null, 2);
 
+      // Check if we have all required info for simulation
+      const isComplete = this.extractor.isComplete(this.infoState.toJSON());
+      let simulation_results;
+      
+      if (isComplete) {
+        // Calculate and format simulation results using simulator's toString method
+        const results = this.simulator.calculate(this.infoState.toJSON());
+        simulation_results = this.simulator.toString(results);
+      } else {
+        // Information still missing
+        simulation_results = `Les résultats de simulation ne sont pas encore prêts car il manque des informations. Tu dois continuer à poser des questions pour obtenir les données manquantes`;
+      }
+
       // Use LangChain prompt template with variables
       const formattedPrompt = await this.promptTemplate.formatMessages({
         state_json,
+        simulation_results,
         chat_history: historyMessages,
         input: message,
       });
