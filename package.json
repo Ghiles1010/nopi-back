@@ -1,0 +1,20 @@
+{
+  "name": "lmnp-chatbot-backend",
+  "version": "1.0.0",
+  "description": "LangChain-powered chatbot for LMNP simulator",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.1.0",
+    "@langchain/openai": "^0.0.14",
+    "dotenv": "^16.3.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
