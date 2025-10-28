@@ -40,6 +40,23 @@ export class Chatbot {
 
     // Create dynamic prompt template
     this.createPromptTemplate();
+
+    // Seed a welcome message immediately for a fresh session
+    this.addInitialMessage();
+  }
+
+  /**
+   * Optionally add a welcome message at session creation
+   */
+  addInitialMessage() {
+    // Synchronous check to ensure the message is present before first read
+    if (!this.memory) return;
+    const hasHistory = Array.isArray(this.memory.history) && this.memory.history.length > 0;
+    if (!hasHistory) {
+      this.memory.addAIMessage(
+        "Bonjour! Comment puis-je t'aider aujourd'hui en matière d'investissement immobilier LMNP? As-tu des questions sur la fiscalité LMNP ou souhaites-tu faire une simulation pour comparer les régimes Micro-BIC et Régime réel?"
+      );
+    }
   }
 
   // formatStateForPrompt removed in favor of InfoState.toPromptVars()

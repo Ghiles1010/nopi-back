@@ -16,8 +16,9 @@ export class SessionManager {
    */
   getSession(sessionId) {
     if (!this.sessions.has(sessionId)) {
+      const chatbot = new Chatbot();
       this.sessions.set(sessionId, {
-        chatbot: new Chatbot(),
+        chatbot,
         createdAt: new Date(),
         lastAccessed: new Date(),
       });
