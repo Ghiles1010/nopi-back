@@ -1,0 +1,29 @@
+version: '3'
+
+vars:
+  IMAGE: nopi-back
+  CONTAINER: nopi-back
+  PORT: 3001
+
+tasks:
+  build:
+    desc: Build backend Docker image
+    cmds:
+      - docker build -t {{.IMAGE}} .
+
+  up:
+    desc: Run backend container with .env mounted
+    cmds:
+      - docker rm -f {{.CONTAINER}} >/dev/null 2>&1 || true
+      - docker run -d --restart unless-stopped --name {{.CONTAINER}} -p {{.PORT}}:3001 -v {{.PWD}}/.env:/app/.env:ro {{.IMAGE}}
+
+  down:
+    desc: Stop and remove backend container
+    cmds:
+      - docker rm -f {{.CONTAINER}} >/dev/null 2>&1 || true
+
+  clean:
+    desc: Remove backend image and container
+    cmds:
+      - task: down
+      - docker rmi {{.IMAGE}} >/dev/null 2>&1 || true
