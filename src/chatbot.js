@@ -8,7 +8,6 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { ConversationMemory } from './memory.js';
 import { InvestmentExtractor } from './extractor.js';
 import InfoState from './models/infoState.js';
-import { TaxSimulator } from './simulator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -31,9 +30,6 @@ export class Chatbot {
     
     // Initialize data extractor agent
     this.extractor = new InvestmentExtractor();
-    
-    // Initialize tax simulator
-    this.simulator = new TaxSimulator();
     
     // Track extracted state across conversation (Pydantic-like model)
     this.infoState = new InfoState();
@@ -73,9 +69,9 @@ export class Chatbot {
   // getStateInfo removed - we now compute variables inline in processMessage
 
   /**
-   * Process a user message and return AI response with extracted data
+   * Process a user message - updates internal state
    */
-  async processMessage(message, conversationHistory = []) {
+  async processMessage(message) {
     try {
       // Add user message to memory
       await this.memory.addUserMessage(message);
@@ -103,19 +99,34 @@ export class Chatbot {
       const historyArray = await this.memory.getHistoryAsArray();
       const updatedState = await this.extractor.extractData(historyArray, this.infoState.toJSON());
       this.infoState.update(updatedState);
-
-      // Return response in the format expected by the frontend
-      return {
-        reply: response.content || String(response),
-        state: this.infoState.toJSON(),
-        simulation: this.extractor.isComplete(this.infoState.toJSON()) 
-          ? this.simulator.calculate(this.infoState.toJSON()) 
-          : null,
-      };
     } catch (error) {
       console.error('Error processing message:', error);
       throw new Error('Failed to process message');
     }
+  }
+
+  /**
+   * Get the last AI reply from history
+   */
+  async getReply() {
+    const history = await this.getHistoryArray();
+    if (history.length === 0) return null;
+    const lastMessage = history[history.length - 1];
+    return lastMessage.role === 'assistant' ? lastMessage.content : null;
+  }
+
+  /**
+   * Check if all required info is complete
+   */
+  isDone() {
+    return this.extractor.isComplete(this.infoState.toJSON());
+  }
+
+  /**
+   * Get history as array for frontend
+   */
+  async getHistoryArray() {
+    return await this.memory.getHistoryAsArray();
   }
 
   /**
@@ -124,13 +135,6 @@ export class Chatbot {
   async resetMemory() {
     await this.memory.clear();
     this.infoState = new InfoState();
-  }
-
-  /**
-   * Get current conversation history
-   */
-  async getHistory() {
-    return await this.memory.getHistoryAsArray();
   }
 }
 

@@ -102,7 +102,7 @@ export class InvestmentExtractor {
    * Check if extracted data is complete enough for simulation
    */
   isComplete(data) {
-    return data.prix_achat && data.loyer_mensuel;
+    return !!(data.prix_achat && data.loyer_mensuel && data.charges_annuelles && data.duree);
   }
 }
 
