@@ -1,46 +1,42 @@
 import 'dotenv/config';
 import { Chatbot } from './chatbot.js';
 import { TaxSimulator } from './simulator.js';
+import readline from 'readline';
 
 // Initialize the chatbot and simulator
 const chatbot = new Chatbot();
 const simulator = new TaxSimulator();
 
-// Example usage - Test conversation flow
+// Interactive CLI loop until chatbot has all required info
 async function main() {
   console.log('LMNP Chatbot initialized...');
-  console.log('Testing conversation with memory...\n');
-  
+  console.log('Type your messages. Ctrl+C to exit.\n');
+
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+  const ask = (q) => new Promise((resolve) => rl.question(q, resolve));
+
   try {
-    // First message
-    console.log('📤 User: "J\'achète un studio à 150 000€, loyer 800€/mois"');
-    await chatbot.processMessage("J'achète un studio à 150 000€, loyer 800€/mois");
-    console.log('📥 AI:', await chatbot.getReply());
-    
-    // Check state and calculate simulation if done
-    console.log('\nState:', chatbot.infoState.toJSON());
-    console.log('Is Done:', chatbot.isDone());
-    
-    if (chatbot.isDone()) {
-      const simulation = simulator.calculate(chatbot.infoState.toJSON());
-      console.log('\nSimulation:', simulation);
-    } else {
-      console.log('\nSimulation: null (waiting for more info)');
+    while (!chatbot.isDone()) {
+      const userInput = await ask('You: ');
+      if (!userInput || !userInput.trim()) continue;
+
+      await chatbot.processMessage(userInput.trim());
+      const reply = await chatbot.getReply();
+      console.log('AI:', reply || '(no reply)');
+
+      console.log('State:', chatbot.infoState.toJSON());
+      console.log('Done:', chatbot.isDone());
     }
-    
-    // Second message - with conversation context
-    console.log('\n\n📤 User: "Quels sont les impôts avec le régime Micro-BIC ?"');
-    await chatbot.processMessage("Quels sont les impôts avec le régime Micro-BIC ?");
-    console.log('📥 AI:', await chatbot.getReply());
-    
-    // Check conversation history
-    console.log('\n\n📊 Conversation History:');
-    console.log(await chatbot.getHistoryArray());
-    console.log('\nState:', chatbot.infoState.toJSON());
-    console.log('Is Done:', chatbot.isDone());
-    
+
+    // When done, compute and show simulation
+    const simulation = simulator.calculate(chatbot.infoState.toJSON());
+    console.log('\nSimulation ready:');
+    console.log(simulation);
   } catch (error) {
     console.error('❌ Error:', error.message);
+  } finally {
+    rl.close();
   }
 }
 
